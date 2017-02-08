@@ -213,17 +213,17 @@ func runPrune(gopts GlobalOptions) error {
 	Verbosef("will delete %d packs and rewrite %d packs, this frees %s\n",
 		len(removePacks), len(rewritePacks), formatBytes(uint64(removeBytes)))
 
-	err = repository.Repack(repo, rewritePacks, usedBlobs)
-	if err != nil {
-		return err
-	}
-
 	for packID := range removePacks {
 		h := restic.Handle{Type: restic.DataFile, Name: packID.String()}
 		err = repo.Backend().Remove(h)
 		if err != nil {
 			Warnf("unable to remove file %v from the repository\n", packID.Str())
 		}
+	}
+
+	err = repository.Repack(repo, rewritePacks, usedBlobs)
+	if err != nil {
+		return err
 	}
 
 	Verbosef("creating new index\n")
