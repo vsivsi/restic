@@ -2,6 +2,7 @@ package repository
 
 import (
 	"crypto/sha256"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -49,7 +50,7 @@ func Repack(repo restic.Repository, packs restic.IDSet, keepBlobs restic.BlobSet
 		debug.Log("pack %v loaded (%d bytes), hash %v", packID.Str(), packLength, hash.Str())
 
 		if !packID.Equal(hash) {
-			return errors.Errorf("hash does not match id: want %v, got %v", packID, hash)
+			fmt.Fprintf(os.Stderr, "hash does not match id: want %v, got %v\n", packID, hash)
 		}
 
 		_, err = tempfile.Seek(0, 0)
@@ -90,7 +91,8 @@ func Repack(repo restic.Repository, packs restic.IDSet, keepBlobs restic.BlobSet
 
 			n, err = crypto.Decrypt(repo.Key(), buf, buf)
 			if err != nil {
-				return err
+				fmt.Fprintf(os.Stderr, "error decrypting blob %v: %v\n", entry, err)
+				continue
 			}
 
 			buf = buf[:n]
