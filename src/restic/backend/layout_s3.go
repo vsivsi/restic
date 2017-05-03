@@ -12,10 +12,10 @@ type S3Layout struct {
 
 var s3LayoutPaths = map[restic.FileType]string{
 	restic.DataFile:     "data",
-	restic.SnapshotFile: "snapshot",
+	restic.SnapshotFile: "snapshots",
 	restic.IndexFile:    "index",
-	restic.LockFile:     "lock",
-	restic.KeyFile:      "key",
+	restic.LockFile:     "locks",
+	restic.KeyFile:      "keys",
 }
 
 // join calls Join with the first empty elements removed.
@@ -49,6 +49,10 @@ func (l *S3Layout) Filename(h restic.Handle) string {
 
 	if h.Type == restic.ConfigFile {
 		name = "config"
+	}
+
+	if h.Type == restic.DataFile && len(h.Name) > 2 {
+		name = l.join(name[:2], name)
 	}
 
 	return l.join(l.URL, l.Path, s3LayoutPaths[h.Type], name)
