@@ -5,8 +5,8 @@ import (
 	"io"
 	"net/http"
 	"path"
+	"path/filepath"
 	"restic"
-	"strings"
 	"sync"
 
 	"restic/backend"
@@ -298,13 +298,12 @@ func (be *s3) List(t restic.FileType, done <-chan struct{}) <-chan string {
 	go func() {
 		defer close(ch)
 		for obj := range listresp {
-			m := strings.TrimPrefix(obj.Key, prefix)
-			if m == "" {
+			if obj.Key == "" {
 				continue
 			}
 
 			select {
-			case ch <- m:
+			case ch <- filepath.Base(obj.Key):
 			case <-done:
 				return
 			}

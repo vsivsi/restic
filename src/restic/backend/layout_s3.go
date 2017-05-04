@@ -40,6 +40,11 @@ func (l *S3Layout) Dirname(h restic.Handle) string {
 		return l.URL + l.Join(l.Path, "/")
 	}
 
+	if h.Type == restic.DataFile && len(h.Name) > 2 {
+		dirname := l.join(l.URL, l.Path, s3LayoutPaths[h.Type], h.Name[:2]) + "/"
+		return dirname
+	}
+
 	return l.join(l.URL, l.Path, s3LayoutPaths[h.Type]) + "/"
 }
 
